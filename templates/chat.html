@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CrimeRoom - Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans flex flex-col items-center min-h-screen p-6">
+<input type="hidden" id="username" value="{{ username }}">
+<input type="hidden" id="roomCode" value="{{ room_code }}">
+
+
+  <div class="w-full max-w-4xl space-y-4">
+
+    <!-- Header -->
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-pink-500">CrimeRoom</h1>
+      <p class="text-sm text-gray-400">Room Code: <span class="font-mono text-green-400">{{ room_code }}</span></p>
+      <p class="text-sm text-gray-400">You are: <span class="font-semibold">{{ username }}</span></p>
+    </div>
+
+
+      <div class="fixed top-4 right-4 z-50">
+  <button
+    onclick="exitToLobby()"
+    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition"
+  >
+    🚪 Exit to Lobby
+  </button>
+</div>
+
+
+
+    <!-- Chat Box -->
+    <div class="bg-gray-800 rounded-lg p-4 h-72 overflow-y-auto" id="chat-box">
+      <!-- messages appear here -->
+    </div>
+
+    <!-- Chat Input -->
+    <div class="flex gap-2">
+      <input id="msg-input" type="text" placeholder="Type a message..." class="w-full p-2 rounded bg-gray-700 text-white focus:outline-none" />
+      <button onclick="sendMessage()" class="bg-pink-600 px-4 py-2 rounded hover:bg-pink-700">Send</button>
+    </div>
+
+    <!-- Video Call Section -->
+    <div class="mt-6">
+      <h2 class="text-xl font-semibold mb-2">Video Call</h2>
+      <div class="flex space-x-4 mt-4">
+  <video id="localVideo" autoplay muted class="w-1/2 rounded-xl shadow" playsinline></video>
+<video id="remoteVideo" autoplay class="w-1/2 rounded-xl shadow" playsinline></video>
+</div>
+      <div class="mt-4 flex gap-2">
+  <button id="startCallBtn" class="bg-green-500 hover:bg-green-600 px-4 py-2 text-white rounded transition-colors">📞 Start Video Call</button>
+  <button id="endCallBtn" class="bg-red-500 hover:bg-red-600 px-4 py-2 text-white rounded transition-colors">📞 End Call</button>
+</div>
+<!--      <button onclick="startVideoCall()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">-->
+<!--  📞 Start Video Call-->
+<!--</button>-->
+
+<!-- Incoming Call Modal -->
+<div id="incomingCallModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-gray-800 p-6 rounded-lg shadow-lg text-center space-y-4 border border-gray-600">
+    <h2 class="text-xl font-semibold text-white">📞 Incoming Call</h2>
+    <p id="callerNameText" class="text-gray-300">From: AgentXXX</p>
+    <div class="space-x-4">
+      <button onclick="acceptCall()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded transition-colors">✅ Accept</button>
+      <button onclick="rejectCall()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded transition-colors">❌ Reject</button>
+    </div>
+  </div>
+</div>
+    </div>
+
+  </div>
+
+  <!-- Socket.io & Chat -->
+  <script src="{{ url_for('static', filename='js/webrtc.js') }}"></script>
+
+
+</body>
+</html>

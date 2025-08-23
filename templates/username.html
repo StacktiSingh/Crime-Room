@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Enter Username - CrimeRoom</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 flex items-center justify-center h-screen text-white">
+
+  <form method="POST" class="bg-gray-800 p-8 rounded-xl shadow-lg w-80 space-y-6">
+    <h1 class="text-2xl font-bold text-center text-pink-500">Enter Your Code Name</h1>
+    <p class="text-sm text-gray-400 text-center">This name will be visible in your secret chat.</p>
+
+    <input
+      type="text"
+      name="username"
+      placeholder="e.g. Agent007"
+      class="w-full px-4 py-2 rounded bg-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500"
+      required
+    />
+
+    <button
+      type="submit"
+      class="w-full bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded text-white font-semibold"
+    >
+      Enter CrimeRoom
+    </button>
+  </form>
+
+</body>
+</html>
