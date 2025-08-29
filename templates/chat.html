@@ -2,29 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CrimeRoom - Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-gray-900 text-white font-sans flex flex-col items-center min-h-screen p-6">
+<body class="text-white font-sans flex flex-col items-center min-h-screen p-6">
 <input type="hidden" id="username" value="{{ username }}">
 <input type="hidden" id="roomCode" value="{{ room_code }}">
 
 
-  <div class="w-full max-w-4xl space-y-4">
+  <div class="w-full max-w-6xl space-y-6 fade-in">
 
     <!-- Header -->
-    <div class="text-center">
-      <h1 class="text-3xl font-bold text-pink-500">CrimeRoom</h1>
-      <p class="text-sm text-gray-400">Room Code: <span class="font-mono text-green-400">{{ room_code }}</span></p>
-      <p class="text-sm text-gray-400">You are: <span class="font-semibold">{{ username }}</span></p>
+    <div class="header-container text-center">
+      <h1 class="text-5xl font-bold title-gradient mb-4">CrimeRoom</h1>
+      <div class="flex justify-center items-center space-x-6 text-lg">
+        <p class="text-secondary">Room Code: <span class="font-mono text-accent-color font-bold">{{ room_code }}</span></p>
+        <div class="w-2 h-2 bg-secondary-color rounded-full animate-pulse"></div>
+        <p class="text-secondary">You are: <span class="font-semibold text-primary-color">{{ username }}</span></p>
+      </div>
     </div>
 
 
-      <div class="fixed top-4 right-4 z-50">
+      <div class="fixed top-6 right-6 z-50">
   <button
     onclick="exitToLobby()"
-    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-lg transition"
+    class="btn-danger px-6 py-3 rounded-full shadow-lg font-semibold"
   >
     🚪 Exit to Lobby
   </button>
@@ -33,40 +39,87 @@
 
 
     <!-- Chat Box -->
-    <div class="bg-gray-800 rounded-lg p-4 h-72 overflow-y-auto" id="chat-box">
+    <div class="chat-container p-6 h-80 overflow-y-auto" id="chat-box">
       <!-- messages appear here -->
     </div>
 
     <!-- Chat Input -->
-    <div class="flex gap-2">
-      <input id="msg-input" type="text" placeholder="Type a message..." class="w-full p-2 rounded bg-gray-700 text-white focus:outline-none" />
-      <button onclick="sendMessage()" class="bg-pink-600 px-4 py-2 rounded hover:bg-pink-700">Send</button>
+    <div class="flex gap-4">
+      <input id="msg-input" type="text" placeholder="Type your message..." class="input-modern flex-1 p-4 text-lg" />
+      <button onclick="sendMessage()" class="btn-primary px-8 py-4 text-lg font-semibold">Send</button>
     </div>
 
     <!-- Video Call Section -->
-    <div class="mt-6">
-      <h2 class="text-xl font-semibold mb-2">Video Call</h2>
-      <div class="flex space-x-4 mt-4">
-  <video id="localVideo" autoplay muted class="w-1/2 rounded-xl shadow" playsinline></video>
-<video id="remoteVideo" autoplay class="w-1/2 rounded-xl shadow" playsinline></video>
-</div>
-      <div class="mt-4 flex gap-2">
-  <button id="startCallBtn" class="bg-green-500 hover:bg-green-600 px-4 py-2 text-white rounded transition-colors">📞 Start Video Call</button>
-  <button id="endCallBtn" class="bg-red-500 hover:bg-red-600 px-4 py-2 text-white rounded transition-colors">📞 End Call</button>
-</div>
+    <div class="mt-8">
+      <div class="header-container mb-6">
+        <h2 class="text-3xl font-bold title-gradient mb-2">Video Call</h2>
+        <p class="text-secondary">Connect face-to-face with your team</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="video-container">
+          <video id="localVideo" autoplay muted class="w-full h-64 object-cover" playsinline></video>
+          <div class="video-overlay">
+            <div id="localVideoStatus" class="flex items-center justify-between">
+              <span class="font-semibold">You</span>
+              <div class="flex space-x-2">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span class="text-xs">Live</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="video-container">
+          <video id="remoteVideo" autoplay class="w-full h-64 object-cover" playsinline></video>
+          <div class="video-overlay">
+            <div id="remoteVideoStatus" class="hidden flex items-center justify-between">
+              <span id="remoteUserName" class="font-semibold">Partner</span>
+              <div id="connectionQuality" class="hidden flex items-center space-x-2">
+                <span id="qualityIndicator" class="w-2 h-2 rounded-full"></span>
+                <span id="qualityText" class="text-xs">Good</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Call Status -->
+      <div id="callStatus" class="hidden glass px-6 py-4 rounded-2xl text-center mb-6 slide-up">
+        <div class="flex items-center justify-center space-x-4">
+          <div class="w-3 h-3 bg-accent-color rounded-full animate-pulse"></div>
+          <span id="callStatusText" class="text-lg font-semibold">Connecting...</span>
+          <span id="callTimer" class="font-mono text-xl bg-black bg-opacity-30 px-3 py-1 rounded-lg"></span>
+        </div>
+      </div>
+
+      <!-- Call Controls -->
+      <div class="flex flex-wrap gap-4 justify-center">
+        <button id="startCallBtn" class="btn-success px-8 py-4 text-lg font-semibold">📞 Start Video Call</button>
+        <button id="endCallBtn" class="btn-danger px-8 py-4 text-lg font-semibold hidden">📞 End Call</button>
+        
+        <!-- Media Controls (hidden initially) -->
+        <div id="mediaControls" class="hidden flex gap-4 flex-wrap justify-center">
+          <button id="muteBtn" class="btn-muted px-6 py-3 font-semibold" title="Mute/Unmute (Ctrl+M)">🎤 Mute</button>
+          <button id="videoBtn" class="btn-muted px-6 py-3 font-semibold" title="Toggle Video (Ctrl+D)">📹 Video Off</button>
+          <button id="screenShareBtn" class="btn-secondary px-6 py-3 font-semibold" title="Share Screen">🖥️ Share Screen</button>
+          <button id="helpBtn" class="btn-muted px-4 py-3 text-sm font-semibold" title="Keyboard Shortcuts">❓</button>
+        </div>
+      </div>
 <!--      <button onclick="startVideoCall()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">-->
 <!--  📞 Start Video Call-->
 <!--</button>-->
 
 <!-- Incoming Call Modal -->
-<div id="incomingCallModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-gray-800 p-6 rounded-lg shadow-lg text-center space-y-4 border border-gray-600">
-    <h2 class="text-xl font-semibold text-white">📞 Incoming Call</h2>
-    <p id="callerNameText" class="text-gray-300">From: AgentXXX</p>
-    <div class="space-x-4">
-      <button onclick="acceptCall()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded transition-colors">✅ Accept</button>
-      <button onclick="rejectCall()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded transition-colors">❌ Reject</button>
+<div id="incomingCallModal" class="hidden fixed inset-0 modal-overlay flex items-center justify-center z-50">
+  <div class="modal-content p-8 text-center space-y-6 max-w-md mx-4 slide-up">
+    <div class="text-6xl mb-4">📞</div>
+    <h2 class="text-2xl font-bold text-white">Incoming Call</h2>
+    <p id="callerNameText" class="text-xl text-secondary font-semibold">From: AgentXXX</p>
+    <div class="flex space-x-4 justify-center">
+      <button onclick="acceptCall()" class="btn-success px-8 py-4 text-lg font-semibold">✅ Accept</button>
+      <button onclick="rejectCall()" class="btn-danger px-8 py-4 text-lg font-semibold">❌ Reject</button>
     </div>
+    <p class="text-sm text-muted">Ringtone will stop when you respond</p>
   </div>
 </div>
     </div>

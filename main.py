@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO, join_room, emit
-import random, string
+import random, string, os
 
 app = Flask(__name__)
-app.secret_key = 'secret123'
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+app.secret_key = os.environ.get('SECRET_KEY', 'secret123')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet', logger=True, engineio_logger=True)
 
 def generate_room_code(length=5):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
@@ -110,4 +110,5 @@ def handle_end_call(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, host='0.0.0.0', port=port, debug=False)
